@@ -130,6 +130,15 @@ pub fn window_event(
     scale_factor: f64,
     modifiers: winit::keyboard::ModifiersState,
 ) -> Option<Event> {
+    window_event_ref(&event, scale_factor, modifiers)
+}
+
+/// Converts a winit window event into an iced event.
+pub fn window_event_ref(
+    event: &winit::event::WindowEvent,
+    scale_factor: f64,
+    modifiers: winit::keyboard::ModifiersState,
+) -> Option<Event> {
     use winit::event::WindowEvent;
 
     match event {
@@ -157,7 +166,7 @@ pub fn window_event(
         WindowEvent::CursorLeft { .. } => {
             Some(Event::Mouse(mouse::Event::CursorLeft))
         }
-        WindowEvent::MouseInput { button, state, .. } => {
+        &WindowEvent::MouseInput { button, state, .. } => {
             let button = mouse_button(button);
 
             Some(Event::Mouse(match state {
@@ -170,7 +179,7 @@ pub fn window_event(
             }))
         }
         WindowEvent::MouseWheel { delta, .. } => match delta {
-            winit::event::MouseScrollDelta::LineDelta(delta_x, delta_y) => {
+            &winit::event::MouseScrollDelta::LineDelta(delta_x, delta_y) => {
                 Some(Event::Mouse(mouse::Event::WheelScrolled {
                     delta: mouse::ScrollDelta::Lines {
                         x: delta_x,
@@ -260,7 +269,7 @@ pub fn window_event(
                 self::modifiers(new_modifiers.state()),
             )))
         }
-        WindowEvent::Focused(focused) => Some(Event::Window(if focused {
+        &WindowEvent::Focused(focused) => Some(Event::Window(if focused {
             window::Event::Focused
         } else {
             window::Event::Unfocused
@@ -274,7 +283,7 @@ pub fn window_event(
         WindowEvent::HoveredFileCancelled => {
             Some(Event::Window(window::Event::FilesHoveredLeft))
         }
-        WindowEvent::Touch(touch) => {
+        &WindowEvent::Touch(touch) => {
             Some(Event::Touch(touch_event(touch, scale_factor)))
         }
         WindowEvent::Moved(position) => {
